@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwriting Recognition</title>
+</head>
+<body>
+    <h1>Handwriting Recognition</h1>
+    <form action="/process_image" method="post" enctype="multipart/form-data" id="imageForm">
+        <input type="file" name="image" accept="image/*">
+        <input type="button" value="Submit" onclick="processImage()">
+    </form>
+    
+    <div id="predictionResult"></div>
+    
+    <div>
+        <img id="inputImage" src="" alt="Input Image" style="max-width: 500px; max-height: 500px;">
+    </div>
+
+    <audio id="audioPlayer" controls style="display:none;"></audio>
+
+    <script>
+        function processImage() {
+            var form = document.getElementById('imageForm');
+            var formData = new FormData(form);
+
+            fetch('/process_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the input image
+                var inputImage = document.getElementById('inputImage');
+                inputImage.src = URL.createObjectURL(form.elements.image.files[0]);
+
+                document.getElementById('predictionResult').innerHTML = "<p>Predicted Text: " + data.prediction + "</p>";
+
+                // Create an Audio element
+                var audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = 'data:audio/mp3;base64,' + data.audio_data;
+
+                // Show the audio player
+                audioPlayer.style.display = 'block';
+
+                // Play the audio
+                audioPlayer.play();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
